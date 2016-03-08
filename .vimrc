@@ -14,14 +14,16 @@
 " Don't try too hard to be backwards-compatible with "vi".
 set nocompatible
 
+set autochdir
+
+execute pathogen#infect()
+
 " When started as "evim", evim.vim will already have done these settings.
 if v:progname =~? "evim"
   finish
 endif
 
 set visualbell
-
-set autochdir
 
 " Use Vim settings, rather then Vi settings (much better!).
 " This must be first, because it changes other options as a side effect.
@@ -34,7 +36,7 @@ if has("vms")
   set nobackup		" do not keep a backup file, use versions instead
 else
   set backup		" keep a backup file
-  set backupdir=c:/tmp,c:/temp,~/backup,.
+  set backupdir=c:/Tmp,c:/Temp,~/Backup,.
 endif
 set history=50		" keep 50 lines of command line history
 set ruler		" show the cursor position all the time
@@ -70,9 +72,10 @@ if has("autocmd")
   " Also load indent files, to automatically do language-dependent indenting.
   filetype plugin indent on
 
-
+  au BufRead,BufNewFile *.rogue set filetype=rogue 
   au BufRead,BufNewFile *.bard set filetype=bard 
-  au BufRead,BufNewFile *.slag set filetype=slag 
+  au BufRead,BufNewFile *.slag set filetype=bard 
+  au BufRead,BufNewFile *.orbit set filetype=orbit 
   au BufRead,BufNewFile *.m set filetype=objc
   au BufRead,BufNewFile *.mm set filetype=objcpp
   let g:alternateExtensions_{'m'} = "h"
@@ -87,7 +90,7 @@ if has("autocmd")
   au!
 
   " For all text files set 'textwidth' to 78 characters.
-  autocmd FileType text setlocal textwidth=78
+  "autocmd FileType text setlocal textwidth=78
 
   " When editing a file, always jump to the last known cursor position.
   " Don't do it when the position is invalid or when inside an event handler
@@ -174,6 +177,8 @@ set shiftwidth=2
 " times would give you a TAB and 2 spaces.
 set softtabstop=2
 
+set tabstop=2
+
 " Expands any tab characters you type to be the corresponding number 
 " of spaces.
 set et
@@ -210,4 +215,16 @@ set formatoptions=t
 " set noai
 
 " CDC = Change to Directory of Current file
-command CDC cd %:p:h
+command CDC lcd %:p:h
+
+" Moves cursor to last known position when opening a file
+au BufReadPost *
+        \ if line("'\"") > 0 && line("'\"") <= line("$") |
+        \  execute 'normal! g`"zvzz' |
+        \ endif
+
+" Remove trailing whitespace from files
+"autocmd FileType c,cpp,java,php,rogue autocmd BufWritePre <buffer> :%s/\s\+$//e
+autocmd BufWritePre * :%s/\s\+$//e
+
+
